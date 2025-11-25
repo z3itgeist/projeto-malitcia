@@ -17,7 +17,7 @@ const caminhoPublico = path.join(__dirname, 'public');
 app.use(express.static(caminhoPublico));
 
 // Conexão com o Supabase
-const supabaseUrl = process.env.SUPABASE_URL; 
+const supabaseUrl = 'https://umypodkvccgvlqvysrum.supabase.co'; 
 const supabaseKey = process.env.SUPABASE_KEY; 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
