@@ -6,26 +6,29 @@
     <title>Dashboard Administrativo</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Ícones (Bootstrap Icons) -->
+    <!-- Ícones -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { background-color: #f8f9fa; }
-        .card-metric { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .card-metric:hover { transform: translateY(-5px); }
-        .icon-box { font-size: 2rem; opacity: 0.8; }
-        .bg-red-light { background-color: #ffcccc; color: #d32f2f; }
+        .card-metric { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .table-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
-    <!-- Navbar Simples -->
+    <!-- Navbar -->
     <nav class="navbar navbar-light bg-white shadow-sm mb-4">
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1 text-danger">
                 <i class="bi bi-gift-fill me-2"></i>Gestão de Fidelidade
             </span>
-            <button class="btn btn-outline-danger btn-sm" onclick="logout()">Sair</button>
+            <div>
+                <!-- BOTÃO NOVO: Facilita o cadastro presencial -->
+                <a href="/cadastro.html" target="_blank" class="btn btn-outline-danger btn-sm me-2">
+                    <i class="bi bi-person-plus-fill"></i> Novo Cadastro
+                </a>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Sair</button>
+            </div>
         </div>
     </nav>
 
@@ -41,7 +44,7 @@
                             <h6 class="text-muted text-uppercase mb-1">Total Clientes</h6>
                             <h2 class="fw-bold mb-0" id="dashTotalClientes">-</h2>
                         </div>
-                        <div class="icon-box text-primary"><i class="bi bi-people-fill"></i></div>
+                        <div class="icon-box text-primary fs-2"><i class="bi bi-people-fill"></i></div>
                     </div>
                 </div>
             </div>
@@ -54,7 +57,7 @@
                             <h6 class="text-muted text-uppercase mb-1">Aniversariantes (Mês)</h6>
                             <h2 class="fw-bold mb-0 text-danger" id="dashNiverMes">-</h2>
                         </div>
-                        <div class="icon-box text-danger"><i class="bi bi-calendar-event"></i></div>
+                        <div class="icon-box text-danger fs-2"><i class="bi bi-calendar-event"></i></div>
                     </div>
                 </div>
             </div>
@@ -67,7 +70,7 @@
                             <h6 class="text-muted text-uppercase mb-1">Cupons Utilizados</h6>
                             <h2 class="fw-bold mb-0 text-success" id="dashCuponsUsados">-</h2>
                         </div>
-                        <div class="icon-box text-success"><i class="bi bi-ticket-perforated-fill"></i></div>
+                        <div class="icon-box text-success fs-2"><i class="bi bi-ticket-perforated-fill"></i></div>
                     </div>
                 </div>
             </div>
@@ -76,13 +79,15 @@
         <!-- 2. GERADOR DE CUPONS (Semanal) -->
         <div class="table-container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">🎂 Aniversariantes da Próxima Semana</h4>
+                <h4 class="mb-0">🎂 Aniversariantes da Semana</h4>
                 <button class="btn btn-sm btn-outline-secondary" onclick="carregarDados()">Atualizar Lista</button>
             </div>
 
             <div class="alert alert-light border" role="alert">
-                <i class="bi bi-pencil me-1"></i> <strong>Mensagem Padrão:</strong>
-                <textarea id="textoPadrao" class="form-control mt-2" rows="2">Parabéns {nome}! Ganhe {desconto}% OFF com o cupom: {cupom}</textarea>
+                <i class="bi bi-whatsapp text-success"></i> <strong>Mensagem Padrão (WhatsApp):</strong>
+                <textarea id="textoPadrao" class="form-control mt-2" rows="2">Parabéns {nome}! 🎂
+Como presente de aniversário, aqui está um cupom de {desconto}% de desconto: *{cupom}*. 
+Venha nos visitar!</textarea>
             </div>
 
             <div class="table-responsive">
@@ -103,11 +108,9 @@
             </div>
         </div>
         
-        <!-- Área de Resultados (Logs) -->
         <div id="resultadoEnvios" class="mt-4 mb-5"></div>
     </div>
 
-    <!-- Scripts -->
     <script src="admin.js"></script>
     <script>
         function logout() {

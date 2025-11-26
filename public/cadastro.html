@@ -3,32 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste</title>
+    <title>Cadastro de Clientes</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card-cadastro {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+        }
+        .card-header {
+            background-color: #ffcccc; /* Vermelho Claro */
+            color: #d32f2f; /* Vermelho Escuro para contraste */
+            text-align: center;
+            padding: 20px;
+            border-bottom: none;
+        }
+        /* Botão seguindo o padrão da tela de Login */
+        .btn-custom {
+            background-color: #ffcccc;
+            color: #d32f2f;
+            border: 1px solid #ffcccc;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: 100%;
+            padding: 10px;
+        }
+        .btn-custom:hover {
+            background-color: #d32f2f;
+            color: white;
+        }
+        .form-control:focus {
+            border-color: #ffcccc;
+            box-shadow: 0 0 0 0.2rem rgba(255, 204, 204, 0.5);
+        }
+        /* Estilo para a mensagem de status */
+        #mensagemStatus {
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 5px;
+            padding: 10px;
+            display: none; /* Escondido por padrão */
+        }
+    </style>
 </head>
 <body>
-    <h1>Abra o console para testar!</h1>
 
-    <form id="cadastro">
-        <label for="name">Nome do cliente:</label>
-        <input id="name">
-        
-        <label for="dateOfBirth">Data de nascimento:</label>
-        <input id="dateOfBirth">
+    <div class="card-cadastro">
+        <div class="card-header">
+            <h3 class="mb-0"><i class="bi bi-person-plus-fill me-2"></i>Novo Cliente</h3>
+            <small>Preencha os dados para o programa de fidelidade</small>
+        </div>
+        <div class="card-body p-4">
+            <form id="cadastro">
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" placeholder="Ex: Maria Silva" required>
+                </div>
 
-        <label for="docNumber">RG ou CPF:</label>
-        <input id="docNumber">
-        
-        <label for="email">E-mail:</label>
-        <input id="email">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="dateOfBirth" class="form-label">Data de Nascimento <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="dateOfBirth" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="phone" class="form-label">Telefone / WhatsApp <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="phone" placeholder="(11) 99999-8888" required>
+                    </div>
+                </div>
 
-        <label for="phone">Telefone:</label>
-        <input id="phone">
+                <div class="mb-3">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" class="form-control" id="email" placeholder="cliente@email.com">
+                </div>
 
-        <button>Cadastrar</button>
-    </form>
+                <div class="mb-3">
+                    <label for="docNumber" class="form-label">RG ou CPF</label>
+                    <input type="text" class="form-control" id="docNumber" placeholder="Apenas números">
+                </div>
 
-    <div id="mensagemStatus"></div>
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-custom">
+                        CADASTRAR CLIENTE
+                    </button>
+                </div>
 
+            </form>
+
+            <!-- Área de feedback visual -->
+            <div id="mensagemStatus"></div>
+        </div>
+    </div>
+
+    <!-- Script de lógica do formulário -->
     <script src="script.js"></script>
+    
+    <!-- Pequeno script extra apenas para mostrar a mensagemStatus com estilo bootstrap via JS -->
+    <script>
+        // Observador para estilizar a mensagem de sucesso/erro quando o script.js alterá-la
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                const target = mutation.target;
+                if (target.innerText.length > 0) {
+                    target.style.display = 'block';
+                    if (target.innerText.includes('sucesso')) {
+                        target.className = 'alert alert-success';
+                    } else if (target.innerText.includes('Erro')) {
+                        target.className = 'alert alert-danger';
+                    } else {
+                        target.className = 'alert alert-info';
+                    }
+                }
+            });
+        });
+        
+        const statusDiv = document.getElementById('mensagemStatus');
+        observer.observe(statusDiv, { childList: true, characterData: true, subtree: true });
+    </script>
 </body>
 </html>

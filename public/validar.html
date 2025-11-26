@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validar Cupom</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card-validacao {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            background-color: white;
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #d32f2f; /* Vermelho Escuro */
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .resultado-box {
+            display: none; /* Escondido até pesquisar */
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            border: 2px dashed #ccc;
+        }
+        .desconto-gigante {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #198754; /* Verde */
+        }
+        .status-usado {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card card-validacao">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="bi bi-qr-code-scan me-2"></i>Validar Cupom</h4>
+        </div>
+        <div class="card-body p-4">
+            
+            <!-- Formulário de Busca -->
+            <form id="formBusca" onsubmit="buscarCupom(event)">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Digite o Código do Cupom</label>
+                    <div class="input-group input-group-lg">
+                        <input type="text" class="form-control text-uppercase" id="codigoCupom" placeholder="Ex: NIVER15_ANA" required>
+                        <button class="btn btn-dark" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Área de Resultado (Aparece depois de buscar) -->
+            <div id="resultado" class="resultado-box">
+                <!-- Conteúdo injetado via JS -->
+            </div>
+
+        </div>
+        <div class="card-footer text-center bg-white border-0 pb-3">
+            <a href="/admin.html" class="text-decoration-none text-muted small">Voltar ao Admin</a>
+        </div>
+    </div>
+
+    <!-- Script da Lógica -->
+    <script src="validar.js"></script>
+</body>
+</html>
