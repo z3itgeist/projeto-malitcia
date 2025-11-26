@@ -1,32 +1,60 @@
-function cadastro (nome, nasc, doc, email, tel){
-    const cliente = {nome, nasc, doc, email, tel};
-    fetch('http://localhost:3000/cadastroCliente', {
-
-        method:'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(cliente)
-    }) .then ((respostaDoServidor) => {
-        return respostaDoServidor.text();
-    }) .then((textoFinal) =>{
-        const divMensagem = document.getElementById('mensagemStatus')
-
-        divMensagem.innerText = textoFinal;
-    })
-}   
-
-
+// Seleciona o formulário pelo ID
 const formulario = document.getElementById("cadastro");
-formulario.addEventListener("submit", (event) => {
+
+// Adiciona um "ouvinte" para quando o botão de enviar for clicado
+formulario.addEventListener("submit", async (event) => {
+    // 1. Impede que a página recarregue sozinha (comportamento padrão do HTML)
     event.preventDefault();
 
-    const nameForm = document.getElementById('name').value;
-    const dateForm = document.getElementById('dateOfBirth').value;
-    const docForm = document.getElementById('docNumber').value;
-    const emailForm = document.getElementById('email').value;
-    const phoneForm = document.getElementById('phone').value;
+    // 2. Captura os dados digitados nos campos
+    const nome = document.getElementById('name').value;
+    const nasc = document.getElementById('dateOfBirth').value;
+    const doc = document.getElementById('docNumber').value;
+    const email = document.getElementById('email').value;
+    const tel = document.getElementById('phone').value;
 
-    cadastro(nameForm,dateForm,docForm,emailForm,phoneForm);
+    // 3. Prepara o pacote de dados
+    const dadosCliente = {
+        nome: nome,
+        nasc: nasc,
+        doc: doc,
+        email: email,
+        tel: tel
+    };
 
-})
+    // Seleciona a div de mensagem para dar feedback visual
+    const divMensagem = document.getElementById('mensagemStatus');
+    divMensagem.style.display = 'block';
+    divMensagem.innerText = "Enviando dados...";
+    divMensagem.className = 'alert alert-info'; // Estilo azul do Bootstrap
+
+    try {
+        // 4. Envia os dados para o servidor (Rota /cadastro no server.js)
+        const resposta = await fetch('/cadastro', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dadosCliente)
+        });
+
+        // 5. Verifica se deu certo
+        if (resposta.ok) {
+            const textoResposta = await resposta.text();
+            divMensagem.innerText = textoResposta; // "Cadastro salvo com sucesso!"
+            divMensagem.className = 'alert alert-success'; // Estilo verde
+            
+            // Limpa o formulário para o próximo cadastro
+            formulario.reset();
+        } else {
+            const erroTexto = await resposta.text();
+            divMensagem.innerText = "Erro: " + erroTexto;
+            divMensagem.className = 'alert alert-danger'; // Estilo vermelho
+        }
+
+    } catch (erro) {
+        console.error(erro);
+        divMensagem.innerText = "Erro de conexão com o servidor.";
+        divMensagem.className = 'alert alert-danger';
+    }
+});

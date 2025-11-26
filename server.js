@@ -86,6 +86,43 @@ app.post('/registrar-cupom', async (req, res) => {
     res.sendStatus(200);
 });
 
+// ==========================================
+//           ROTAS DE VALIDAÇÃO (CAIXA)
+// ==========================================
+
+// 1. Consultar se um cupom existe e seu status
+app.get('/consultar-cupom/:codigo', async (req, res) => {
+    const codigo = req.params.codigo.toUpperCase();
+
+    const { data, error } = await supabase
+        .from('cupons')
+        .select('*')
+        .eq('codigo', codigo)
+        .single(); // Traz apenas um item
+
+    if (error || !data) {
+        return res.status(404).json({ mensagem: 'Cupom não encontrado' });
+    }
+
+    res.json(data);
+});
+
+// 2. Dar baixa no cupom (marcar como usado)
+app.post('/usar-cupom', async (req, res) => {
+    const { codigo } = req.body;
+
+    const { error } = await supabase
+        .from('cupons')
+        .update({ status: 'usado' }) // Muda o status
+        .eq('codigo', codigo);
+
+    if (error) {
+        return res.status(500).json({ erro: 'Erro ao atualizar cupom' });
+    }
+
+    res.sendStatus(200);
+});
+
 
 // ==========================================
 // 3. ROTAS DE AUTENTICAÇÃO E CADASTRO
