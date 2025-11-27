@@ -162,8 +162,23 @@ async function processarEnvio(index) {
     const desconto = inputDesconto.value;
     const template = document.getElementById('textoPadrao').value;
 
-    const primeiroNome = nomeSeguro.split(' ')[0].toUpperCase().normalize("NFD").replace(/[^A-Z]/g, "");
-    const codigoCupom = `NIVER${desconto}_${primeiroNome}`;
+    // === MUDANÇA AQUI: Lógica para incluir Sobrenome ===
+    const partesNome = nomeSeguro.trim().split(/\s+/); // Divide por espaços
+    
+    // Pega o primeiro nome (limpo)
+    const primeiroNome = partesNome[0].toUpperCase().normalize("NFD").replace(/[^A-Z]/g, "");
+    
+    // Pega o último nome (se existir mais de um nome)
+    let ultimoNome = "";
+    if (partesNome.length > 1) {
+        ultimoNome = partesNome[partesNome.length - 1].toUpperCase().normalize("NFD").replace(/[^A-Z]/g, "");
+    }
+
+    // Se tiver sobrenome, cria NIVER15_ANA_SILVA. Se não, cria NIVER15_ANA
+    const codigoCupom = ultimoNome 
+        ? `NIVER${desconto}_${primeiroNome}_${ultimoNome}`
+        : `NIVER${desconto}_${primeiroNome}`;
+    // ===================================================
 
     const mensagem = template
         .replace(/{nome}/g, nomeSeguro.split(' ')[0])
