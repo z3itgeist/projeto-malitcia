@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Aniversariantes do Mês</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light p-4">
+
+    <div class="container bg-white p-4 rounded shadow">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-danger"><i class="bi bi-calendar2-month"></i> Aniversariantes do Mês</h2>
+                <p class="text-muted mb-0">Controle de cupons enviados neste mês</p>
+            </div>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="carregarLista()">
+                    <i class="bi bi-arrow-clockwise"></i> Atualizar
+                </button>
+                <a href="/admin.html" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Dia</th>
+                        <th>Nome</th>
+                        <th>Data Completa</th>
+                        <th>WhatsApp</th>
+                        <th class="text-center">Status Cupom</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaMes">
+                    <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 1. SEGURANÇA: Verifica se está logado
+        if (!localStorage.getItem('adminLogado')) {
+            window.location.href = '/';
+        }
+
+        // Carrega ao abrir a página
+        window.onload = () => {
+            carregarLista();
+        };
+
+        async function carregarLista() {
+            const tbody = document.getElementById('tabelaMes');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center"><span class="spinner-border spinner-border-sm"></span> Carregando...</td></tr>';
+
+            try {
+                // Chama a rota no servidor
+                const res = await fetch('/aniversariantes-mes-detalhado');
+                const dados = await res.json();
+                
+                tbody.innerHTML = '';
+
+                if (dados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted p-4">Nenhum aniversariante encontrado neste mês.</td></tr>';
+                    return;
+                }
+
+                // Ordenar por dia do aniversário
+                dados.sort((a, b) => {
+                    const diaA = parseInt(a.data_nascimento.split('-')[2]);
+                    const diaB = parseInt(b.data_nascimento.split('-')[2]);
+                    return diaA - diaB;
+                });
+
+                dados.forEach(c => {
+                    // Formata Data
+                    const dia = c.data_nascimento.split('-')[2];
+                    const dataF = new Date(c.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    
+                    // Lógica visual do status
+                    let statusHtml = '<span class="badge bg-secondary">Não Gerado</span>';
+                    
+                    if (c.cupom) {
+                        if (c.cupom.status === 'usado') {
+                            statusHtml = `<span class="badge bg-success">USADO (${c.cupom.codigo})</span>`;
+                        } else {
+                            statusHtml = `<span class="badge bg-warning text-dark">ATIVO (${c.cupom.codigo})</span>`;
+                        }
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="fs-4 fw-bold text-danger">${dia}</span></td>
+                            <td><strong>${c.nome}</strong></td>
+                            <td>${dataF}</td>
+                            <td>${c.telefone}</td>
+                            <td class="text-center">${statusHtml}</td>
+                        </tr>
+                    `;
+                });
+            } catch (erro) {
+                console.error(erro);
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar lista.</td></tr>';
+            }
+        }
+    </script>
+</body>
+</html>

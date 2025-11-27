@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* Remove a borda da linha expandida para parecer que o formulário sai de dentro dela */
+        .table > tbody > tr.no-border > td {
+            border-bottom: none;
+        }
+        .form-edicao {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd; /* Detalhe azul para indicar edição */
+            padding: 15px;
+        }
+    </style>
+</head>
+<body class="bg-light p-4">
+
+    <div class="container bg-white p-4 rounded shadow">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-danger"><i class="bi bi-people-fill"></i> Todos os Clientes</h2>
+            <a href="/admin.html" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar ao Painel
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nome</th>
+                        <th>Nascimento</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th class="text-center" style="width: 180px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaTodos">
+                    <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Necessário para o efeito de Collapse/Dropdown) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // 1. Verificação de Segurança
+        if (!localStorage.getItem('adminLogado')) {
+            window.location.href = '/';
+        }
+
+        // 2. Carregar lista ao abrir
+        window.onload = async () => {
+            carregarTabela();
+        };
+
+        async function carregarTabela() {
+            try {
+                const res = await fetch('/todos-clientes');
+                const clientes = await res.json();
+                
+                const tbody = document.getElementById('tabelaTodos');
+                
+                // Otimização: Cria todo o HTML numa variável antes de jogar na tela
+                let htmlBuffer = '';
+
+                clientes.forEach(c => {
+                    // Formata Data para exibição
+                    const dataF = new Date(c.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    
+                    // ID único para o dropdown deste cliente
+                    const collapseId = `collapseEdit-${c.id}`;
+
+                    // --- CONSTRUÇÃO DAS LINHAS ---
+                    htmlBuffer += `
+                        <tr class="align-middle" id="linha-${c.id}">
+                            <td><strong>${c.nome}</strong></td>
+                            <td>${dataF}</td>
+                            <td>${c.email || '-'}</td>
+                            <td>${c.telefone}</td>
+                            <td class="text-center">
+                                <!-- Botão que abre o Dropdown -->
+                                <button class="btn btn-sm btn-primary me-1" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#${collapseId}" 
+                                        aria-expanded="false" 
+                                        onclick="toggleBotaoEditar(${c.id})">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </button>
+                                
+                                <button class="btn btn-sm btn-danger" onclick="excluir(${c.id}, '${c.nome}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- --- LINHA SECUNDÁRIA (DROPDOWN DE EDIÇÃO) --- -->
+                        <tr>
+                            <td colspan="5" class="p-0 border-0">
+                                <div class="collapse" id="${collapseId}">
+                                    <div class="form-edicao m-2 rounded shadow-sm">
+                                        <h6 class="text-primary mb-3"><i class="bi bi-pencil-square"></i> Editando dados de ${c.nome}</h6>
+                                        <form onsubmit="salvarEdicao(event, ${c.id})">
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label small">Nome Completo</label>
+                                                    <input type="text" class="form-control form-control-sm" id="edit-nome-${c.id}" value="${c.nome}" required>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label small">Nascimento</label>
+                                                    <input type="date" class="form-control form-control-sm" id="edit-nasc-${c.id}" value="${c.data_nascimento}" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Telefone</label>
+                                                    <input type="text" class="form-control form-control-sm" id="edit-tel-${c.id}" value="${c.telefone}" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Email</label>
+                                                    <input type="email" class="form-control form-control-sm" id="edit-email-${c.id}" value="${c.email || ''}">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Documento</label>
+                                                    <input type="text" class="form-control form-control-sm" id="edit-doc-${c.id}" value="${c.documento || ''}">
+                                                </div>
+                                                
+                                                <div class="col-12 text-end mt-3">
+                                                    <!-- Botão Cancelar (fecha o dropdown) -->
+                                                    <button type="button" class="btn btn-sm btn-secondary me-2" 
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#${collapseId}">
+                                                        Cancelar
+                                                    </button>
+                                                    
+                                                    <!-- O Botão SALVAR -->
+                                                    <button type="submit" class="btn btn-sm btn-success px-4">
+                                                        <i class="bi bi-check-lg"></i> SALVAR
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                // Insere tudo de uma vez (mais rápido)
+                tbody.innerHTML = htmlBuffer;
+
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro ao carregar lista.");
+            }
+        }
+
+        // Função visual para mudar estado (opcional)
+        function toggleBotaoEditar(id) {
+            // Placeholder se quisermos mudar ícone do botão
+        }
+
+        // 3. Função de Salvar (PUT)
+        async function salvarEdicao(event, id) {
+            event.preventDefault(); // Não recarregar página
+
+            // Pega o botão que disparou o submit para dar feedback visual
+            const btnSalvar = event.submitter;
+            const textoOriginal = btnSalvar.innerHTML;
+            btnSalvar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Salvando...';
+            btnSalvar.disabled = true;
+
+            const dadosAtualizados = {
+                nome: document.getElementById(`edit-nome-${id}`).value,
+                data_nascimento: document.getElementById(`edit-nasc-${id}`).value,
+                telefone: document.getElementById(`edit-tel-${id}`).value,
+                email: document.getElementById(`edit-email-${id}`).value,
+                documento: document.getElementById(`edit-doc-${id}`).value
+            };
+
+            try {
+                const res = await fetch(`/clientes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosAtualizados)
+                });
+
+                if (res.ok) {
+                    // Fecha o dropdown do bootstrap via JS
+                    const collapseElement = document.getElementById(`collapseEdit-${id}`);
+                    const bsCollapse = bootstrap.Collapse.getInstance(collapseElement);
+                    if (bsCollapse) bsCollapse.hide();
+
+                    // Atualiza a tabela inteira para refletir os dados novos
+                    await carregarTabela();
+                    
+                    alert("Cliente atualizado com sucesso!");
+                } else {
+                    // Tenta ler o erro que o servidor mandou
+                    const erroTexto = await res.text();
+                    alert("Erro ao atualizar dados: " + erroTexto);
+                    
+                    // Restaura botão
+                    btnSalvar.innerHTML = textoOriginal;
+                    btnSalvar.disabled = false;
+                }
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro de conexão: " + erro.message);
+                btnSalvar.innerHTML = textoOriginal;
+                btnSalvar.disabled = false;
+            }
+        }
+
+        // 4. Função de Excluir
+        async function excluir(id, nome) {
+            if (!confirm(`Tem certeza que deseja apagar ${nome}?`)) return;
+
+            try {
+                const res = await fetch(`/clientes/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    document.getElementById(`linha-${id}`).remove(); // Remove visualmente
+                    // Recarrega para garantir limpeza total
+                    carregarTabela(); 
+                } else {
+                    const erroTexto = await res.text();
+                    alert('Erro ao excluir: ' + erroTexto);
+                }
+            } catch (e) {
+                alert('Erro de conexão.');
+            }
+        }
+    </script>
+</body>
+</html>
